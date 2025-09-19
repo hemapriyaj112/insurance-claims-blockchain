@@ -1,0 +1,149 @@
+/* src/components/Navbar.css */
+
+/* Top navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 12px 40px;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* dark mode override when <body> or root has .dark-mode */
+.dark-mode .navbar {
+  background: #1f2127;
+  box-shadow: 0px 2px 6px rgba(255,255,255,0.04);
+}
+
+/* left area: logo + brand */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  height: 35px;
+  width: 35px;
+  object-fit: contain;
+}
+
+.brand {
+  font-size: 22px;
+  font-weight: 700;
+  color: #007bff;
+  margin: 0;
+}
+
+.dark-mode .brand {
+  color: #66b2ff;
+}
+
+/* center links */
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 28px;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+}
+
+.navbar-links li {
+  line-height: 1;
+}
+
+.navbar-links li a {
+  text-decoration: none;
+  font-weight: 600;
+  color: #333;
+  transition: color 0.18s ease;
+}
+
+.navbar-links li a:hover {
+  color: #007bff;
+}
+
+.dark-mode .navbar-links li a {
+  color: #e6eefc;
+}
+
+.dark-mode .navbar-links li a:hover {
+  color: #66b2ff;
+}
+
+/* right side controls */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* dark toggle (emoji) */
+.dark-mode-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 6px;
+  color: inherit;
+}
+
+/* primary wallet button */
+.wallet-btn {
+  padding: 8px 14px;
+  border: none;
+  background: #007bff;
+  color: #fff;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.18s ease;
+}
+
+.wallet-btn:hover {
+  background: #0056b3;
+}
+
+.dark-mode .wallet-btn {
+  background: #66b2ff;
+  color: #111;
+}
+
+/* disconnect / small secondary wallet control */
+.wallet-logout {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid rgba(0,0,0,0.08);
+  cursor: pointer;
+  color: inherit;
+}
+
+.dark-mode .wallet-logout {
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* small screens: keep layout usable */
+@media (max-width: 820px) {
+  .navbar {
+    padding: 10px 18px;
+  }
+
+  .navbar-links {
+    gap: 14px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .logo {
+    height: 30px;
+    width: 30px;
+  }
+}

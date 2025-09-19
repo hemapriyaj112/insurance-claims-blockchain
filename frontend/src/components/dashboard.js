@@ -1,52 +1,52 @@
-import React, { useState } from "react";
-import RegisterPolicyForm from "./RegisterPolicyForm";
-import SubmitClaimForm from "./SubmitClaimForm";
+import React from "react";
+import "./Dashboard.css";
 
-function Dashboard({ policies, claims, onRegisterPolicy, onSubmitClaim, account }) {
-  const [tab, setTab] = useState("register");
-
+function Dashboard() {
   return (
-    <div style={{ maxWidth: 600, margin: "auto", background: "white", padding: 20, borderRadius: 8 }}>
-      <div style={{ marginBottom: 20 }}>
-        <button onClick={() => setTab("register")} disabled={tab === "register"}>
-          Register Policy
-        </button>{" "}
-        <button onClick={() => setTab("claim")} disabled={tab === "claim"}>
-          Submit Claim
-        </button>
+    <div className="dashboard">
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="hero-image-placeholder">
+          {/* Temporary placeholder for hero image */}
+          {/* You can replace this div with <img src="YOUR_NEW_IMAGE_URL" /> later */}
+        </div>
+        <div className="hero-text">
+          <h1>Decentralized, Secure, Trust</h1>
+          <p>
+            Manage your insurance policies and claims seamlessly on the blockchain.
+          </p>
+        </div>
       </div>
 
-      {tab === "register" && <RegisterPolicyForm onRegisterPolicy={onRegisterPolicy} />}
-      {tab === "claim" && <SubmitClaimForm policies={policies} onSubmitClaim={onSubmitClaim} />}
-
-      <h3>Policies Registered</h3>
-      <ul>
-        {policies.map((p) => (
-          <li key={p.id}>
-            <strong>{p.policyNumber}</strong> - Holder: {p.holder} - Status: {Number(p.status) === 0 ? "Active" : "Inactive"}
-          </li>
-        ))}
-      </ul>
-
-      <h3>Claims Submitted</h3>
-      <ul>
-        {claims.map((c) => (
-          <li key={c.id}>
-            Claim #{c.id} for Policy #{c.policyId}: {c.incidentDescription} - Amount: {c.claimAmount} - Status: {["Pending", "Approved", "Rejected"][c.claimStatus]}
-          </li>
-        ))}
-      </ul>
-
-      <div style={{ marginTop: 20 }}>
-        <button onClick={() => alert(`Policies Registered: ${policies.length}`)}>
-          Policies Registered
-        </button>{" "}
-        <button onClick={() => alert(`Number of Claims: ${claims.length}`)}>
-          Number of Claims
-        </button>
+      {/* Features Section */}
+      <div className="features-section">
+        <div className="feature">
+          <h3>Decentralized</h3>
+          <p>All policies and claims are securely stored on blockchain.</p>
+        </div>
+        <div className="feature">
+          <h3>Secure</h3>
+          <p>End-to-end encryption ensures your data is safe and private.</p>
+        </div>
+        <div className="feature">
+          <h3>Trust</h3>
+          <p>Transparent process, verified and immutable on-chain.</p>
+        </div>
       </div>
 
-      <p>Connected account: {account}</p>
+      {/* Action Cards */}
+      <div className="action-cards">
+        <div className="action-card">
+          <h3>New Claim</h3>
+          <p>Register a new policy and start coverage.</p>
+          <a href="#learn-more">Learn More</a>
+        </div>
+        <div className="action-card">
+          <h3>Existing Claim</h3>
+          <p>Submit a claim for an existing policy.</p>
+          <a href="#learn-more">Learn More</a>
+        </div>
+      </div>
     </div>
   );
 }

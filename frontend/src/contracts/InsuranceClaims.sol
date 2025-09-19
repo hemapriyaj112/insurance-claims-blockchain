@@ -4,14 +4,15 @@ pragma solidity ^0.8.0;
 contract InsuranceClaims {
     enum PolicyStatus { Active, Inactive }
     enum ClaimStatus { Pending, Approved, Rejected }
+    enum DocStatus { PendingVerification, Approved, Rejected }  // ✅ Added
 
     struct Policy {
         uint policyId;
-        string policyNumber;      // User-defined policy number string
+        string policyNumber;
         string details;
         uint coverageAmount;
-        uint startDate;           // timestamp
-        uint endDate;             // timestamp
+        uint startDate;
+        uint endDate;
         PolicyStatus status;
         string contactInfo;
         address holder;
@@ -24,7 +25,10 @@ contract InsuranceClaims {
         uint incidentDate;        // timestamp
         string incidentDescription;
         uint claimAmount;
+        string insuranceType;     // ✅ New: "Health", "Motor", "Life", etc.
+        string[] documents;       // ✅ New: IPFS/file hashes
         ClaimStatus claimStatus;
+        DocStatus docStatus;      // ✅ New: track doc verification
         address claimant;
     }
 
@@ -33,10 +37,13 @@ contract InsuranceClaims {
     mapping(uint => Policy) public policies;
     mapping(uint => Claim) public claims;
 
+    // ✅ Updated events
     event PolicyRegistered(uint indexed policyId, string policyNumber, string details, address holder);
-    event ClaimSubmitted(uint indexed claimId, uint policyId, address claimant);
+    event ClaimSubmitted(uint indexed claimId, uint policyId, address claimant, string insuranceType);
     event ClaimStatusChanged(uint indexed claimId, ClaimStatus newStatus);
+    event DocumentVerified(uint indexed claimId, DocStatus status);
 
+    // ✅ Fixed bug: status assignment in registerPolicy
     function registerPolicy(
         string memory policyNumber,
         string memory details,
@@ -46,7 +53,7 @@ contract InsuranceClaims {
         bool isActive,
         string memory contactInfo
     ) public {
-        policyCount++;
+        policyCount += 1;
         policies[policyCount] = Policy(
             policyCount,
             policyNumber,
@@ -61,17 +68,21 @@ contract InsuranceClaims {
         emit PolicyRegistered(policyCount, policyNumber, details, msg.sender);
     }
 
+    // ✅ Updated to accept insurance type + documents
     function submitClaim(
         uint policyId,
         string memory claimantName,
         uint incidentDate,
         string memory incidentDescription,
-        uint claimAmount
+        uint claimAmount,
+        string memory insuranceType,
+        string[] memory documents
     ) public {
         require(policyId > 0 && policyId <= policyCount, "Invalid policy ID");
         Policy memory policy = policies[policyId];
         require(policy.holder == msg.sender, "Not the policy holder");
         require(policy.status == PolicyStatus.Active, "Policy is not active");
+
         claimCount++;
         claims[claimCount] = Claim(
             claimCount,
@@ -80,23 +91,45 @@ contract InsuranceClaims {
             incidentDate,
             incidentDescription,
             claimAmount,
+            insuranceType,
+            documents,
             ClaimStatus.Pending,
+            DocStatus.PendingVerification,
             msg.sender
         );
-        emit ClaimSubmitted(claimCount, policyId, msg.sender);
+        emit ClaimSubmitted(claimCount, policyId, msg.sender, insuranceType);
     }
 
-    function approveClaim(uint claimId) public {
+    // ✅ Insurer verifies documents
+    function verifyDocuments(uint claimId, bool approve) public {
         require(claimId > 0 && claimId <= claimCount, "Invalid claim ID");
-        require(claims[claimId].claimStatus == ClaimStatus.Pending, "Claim not pending");
-        claims[claimId].claimStatus = ClaimStatus.Approved;
-        emit ClaimStatusChanged(claimId, ClaimStatus.Approved);
+        require(claims[claimId].docStatus == DocStatus.PendingVerification, "Already verified");
+
+        if (approve) {
+            claims[claimId].docStatus = DocStatus.Approved;
+            claims[claimId].claimStatus = ClaimStatus.Approved;
+        } else {
+            claims[claimId].docStatus = DocStatus.Rejected;
+            claims[claimId].claimStatus = ClaimStatus.Rejected;
+        }
+        emit DocumentVerified(claimId, claims[claimId].docStatus);
     }
 
-    function rejectClaim(uint claimId) public {
-        require(claimId > 0 && claimId <= claimCount, "Invalid claim ID");
-        require(claims[claimId].claimStatus == ClaimStatus.Pending, "Claim not pending");
-        claims[claimId].claimStatus = ClaimStatus.Rejected;
-        emit ClaimStatusChanged(claimId, ClaimStatus.Rejected);
+    function getClaim(uint claimId) public view returns (
+        uint, uint, string memory, uint, string memory, uint, string memory, ClaimStatus, DocStatus, address
+    ) {
+        Claim storage c = claims[claimId];
+        return (
+            c.claimId,
+            c.policyId,
+            c.claimantName,
+            c.incidentDate,
+            c.incidentDescription,
+            c.claimAmount,
+            c.insuranceType,
+            c.claimStatus,
+            c.docStatus,
+            c.claimant
+        );
     }
 }

@@ -1,95 +1,87 @@
 import React, { useState } from "react";
 
-function RegisterPolicyForm({ onRegisterPolicy }) {
-  const [policyNumber, setPolicyNumber] = useState("");
-  const [details, setDetails] = useState("");
-  const [coverageAmount, setCoverageAmount] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [status, setStatus] = useState(true); // true = active
-  const [contactInfo, setContactInfo] = useState("");
+function RegisterPolicyForm() {
+  const [policy, setPolicy] = useState({
+    policyNumber: "",
+    contact: "",
+    details: "",
+    coverage: "",
+    startDate: "",
+    endDate: "",
+  });
+  const [policyId, setPolicyId] = useState(null);
+
+  const handleChange = (e) => {
+    setPolicy({ ...policy, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onRegisterPolicy({
-      policyNumber,
-      details,
-      coverageAmount: Number(coverageAmount),
-      startDate,
-      endDate,
-      status: status ? "active" : "inactive",
-      contactInfo,
-    });
+    // Generate a policy ID (simple example)
+    const id = `POL-${Math.floor(Math.random() * 100000)}`;
+    setPolicyId(id);
+    // Here you would call your smart contract or backend API
+    console.log("Policy registered:", { ...policy, policyId: id });
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ marginBottom: 30 }}>
-      <h3>Register New Policy</h3>
-      <input
-        type="text"
-        placeholder="Policy Number"
-        value={policyNumber}
-        onChange={(e) => setPolicyNumber(e.target.value)}
-        required
-      />
-      <br />
-      <input
-        type="text"
-        placeholder="Policy Details"
-        value={details}
-        onChange={(e) => setDetails(e.target.value)}
-        required
-      />
-      <br />
-      <input
-        type="number"
-        placeholder="Coverage Amount"
-        value={coverageAmount}
-        onChange={(e) => setCoverageAmount(e.target.value)}
-        required
-        min="0"
-      />
-      <br />
-      <label>
-        Start Date:{" "}
+    <div className="form-container">
+      <h2>Register Policy</h2>
+      <form onSubmit={handleSubmit}>
         <input
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
+          type="text"
+          name="policyNumber"
+          placeholder="Policy Number"
+          value={policy.policyNumber}
+          onChange={handleChange}
           required
         />
-      </label>
-      <br />
-      <label>
-        End Date:{" "}
         <input
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
+          type="text"
+          name="contact"
+          placeholder="Contact"
+          value={policy.contact}
+          onChange={handleChange}
           required
         />
-      </label>
-      <br />
-      <label>
-        Status:{" "}
-        <input
-          type="checkbox"
-          checked={status}
-          onChange={(e) => setStatus(e.target.checked)}
+        <textarea
+          name="details"
+          placeholder="Policy Details"
+          value={policy.details}
+          onChange={handleChange}
+          required
         />
-        (Active)
-      </label>
-      <br />
-      <input
-        type="text"
-        placeholder="Contact Information"
-        value={contactInfo}
-        onChange={(e) => setContactInfo(e.target.value)}
-        required
-      />
-      <br />
-      <button type="submit">Register Policy</button>
-    </form>
+        <input
+          type="number"
+          name="coverage"
+          placeholder="Coverage Amount"
+          value={policy.coverage}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="date"
+          name="startDate"
+          value={policy.startDate}
+          onChange={handleChange}
+          required
+        />
+        <input
+          type="date"
+          name="endDate"
+          value={policy.endDate}
+          onChange={handleChange}
+          required
+        />
+        <button type="submit">Register Policy</button>
+      </form>
+
+      {policyId && (
+        <div className="policy-id">
+          <strong>Policy Registered! Your Policy ID:</strong> {policyId}
+        </div>
+      )}
+    </div>
   );
 }
 
