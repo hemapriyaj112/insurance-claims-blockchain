@@ -5,6 +5,7 @@ import Dashboard from "./components/Dashboard";
 import RegisterPolicyForm from "./components/RegisterPolicyForm";
 import SubmitClaimForm from "./components/SubmitClaimForm";
 import TrackClaim from "./components/TrackClaim";
+import InsuranceClaims from "./abis/InsuranceClaims.json";
 import "./App.css";
 
 function App() {

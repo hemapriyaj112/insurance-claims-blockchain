@@ -1,88 +1,113 @@
 import React, { useState } from "react";
+import { ethers } from "ethers";
+import InsuranceClaimsABI from "../abis/InsuranceClaims.json";
+import "./Form.css"; // Assuming Form.css is in the same folder
 
-function RegisterPolicyForm() {
-  const [policy, setPolicy] = useState({
-    policyNumber: "",
-    contact: "",
-    details: "",
-    coverage: "",
-    startDate: "",
-    endDate: "",
-  });
-  const [policyId, setPolicyId] = useState(null);
+const RegisterPolicyForm = () => {
+  const [policyNumber, setPolicyNumber] = useState("");
+  const [insuranceType, setInsuranceType] = useState("");
+  const [coverageAmount, setCoverageAmount] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
+  const [status, setStatus] = useState("");
 
-  const handleChange = (e) => {
-    setPolicy({ ...policy, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = (e) => {
+  const handleRegisterPolicy = async (e) => {
     e.preventDefault();
-    // Generate a policy ID (simple example)
-    const id = `POL-${Math.floor(Math.random() * 100000)}`;
-    setPolicyId(id);
-    // Here you would call your smart contract or backend API
-    console.log("Policy registered:", { ...policy, policyId: id });
+    try {
+      // Crucial validation: Check if fields are empty before sending the transaction.
+      if (!policyNumber.trim() || !insuranceType.trim()) {
+        setStatus("❌ Policy number and insurance type cannot be empty.");
+        return;
+      }
+
+      if (!window.ethereum) {
+        setStatus("MetaMask is required!");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      // **Robustly get the deployed contract address from the ABI**
+      const network = await provider.getNetwork();
+      const chainId = network.chainId.toString();
+      const deployedNetwork = InsuranceClaimsABI.networks[chainId];
+      if (!deployedNetwork) {
+        setStatus("❌ Contract not deployed on this network. Please check Ganache/Hardhat.");
+        return;
+      }
+
+      const contract = new ethers.Contract(
+        deployedNetwork.address,
+        InsuranceClaimsABI.abi,
+        signer
+      );
+
+      setStatus("Transaction sent... Awaiting confirmation.");
+
+      // This is the function call to the smart contract
+      const tx = await contract.registerPolicy(policyNumber, insuranceType);
+
+      await tx.wait();
+
+      setStatus("✅ Policy registered successfully!");
+
+    } catch (err) {
+      console.error(err);
+      setStatus("❌ Transaction Failed: " + (err.message || "An unknown error occurred."));
+    }
   };
 
   return (
     <div className="form-container">
       <h2>Register Policy</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleRegisterPolicy}>
         <input
           type="text"
-          name="policyNumber"
           placeholder="Policy Number"
-          value={policy.policyNumber}
-          onChange={handleChange}
+          value={policyNumber}
+          onChange={(e) => setPolicyNumber(e.target.value)}
           required
         />
         <input
           type="text"
-          name="contact"
-          placeholder="Contact"
-          value={policy.contact}
-          onChange={handleChange}
-          required
-        />
-        <textarea
-          name="details"
-          placeholder="Policy Details"
-          value={policy.details}
-          onChange={handleChange}
+          placeholder="Insurance Type"
+          value={insuranceType}
+          onChange={(e) => setInsuranceType(e.target.value)}
           required
         />
         <input
           type="number"
-          name="coverage"
-          placeholder="Coverage Amount"
-          value={policy.coverage}
-          onChange={handleChange}
+          placeholder="Coverage Amount (ETH)"
+          value={coverageAmount}
+          onChange={(e) => setCoverageAmount(e.target.value)}
           required
         />
         <input
           type="date"
-          name="startDate"
-          value={policy.startDate}
-          onChange={handleChange}
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
           required
         />
         <input
           type="date"
-          name="endDate"
-          value={policy.endDate}
-          onChange={handleChange}
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          required
+        />
+        <input
+          type="text"
+          placeholder="Contact Info"
+          value={contactInfo}
+          onChange={(e) => setContactInfo(e.target.value)}
           required
         />
         <button type="submit">Register Policy</button>
       </form>
-
-      {policyId && (
-        <div className="policy-id">
-          <strong>Policy Registered! Your Policy ID:</strong> {policyId}
-        </div>
-      )}
+      {status && <p className="status-message">{status}</p>}
     </div>
   );
-}
+};
 
 export default RegisterPolicyForm;
